@@ -120,10 +120,8 @@ void node_parse_code(Node *n, InputCode *ic) {
     char *c = line;
     while (*c != '\0') {
       if (*c == ':') {
-        int length = (c - line);
-        char *label = (char *) malloc(sizeof(char) * (length + 1));
-        strncpy(label, line, length);
-        label[length] = '\0';
+        *c = '\0';
+		char *label = strdup(line);
 
         int idx = ic->label_count;
         ic->labels[idx] = label;
@@ -137,8 +135,7 @@ void node_parse_code(Node *n, InputCode *ic) {
         // TODO: compress empty lines and jump to the next instruction
         if (!strlen(rem)) { rem = "NOP"; }
 
-        char *new_line = (char *) malloc(sizeof(char) * strlen(rem));
-        strcpy(new_line, rem);
+		char *new_line = strdup(rem);
 
         free(line);
         line = new_line;
