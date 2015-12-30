@@ -192,12 +192,12 @@ void node_parse_line(Node *n, InputCode *ic, const char *s) {
   }
 }
 
-static inline void node_set_ip(Node *n, short new_val) {
+static void node_set_ip(Node *n, short new_val) {
   if (new_val >= n->instruction_count || new_val < 0) new_val = 0;
   n->ip = new_val;
 }
 
-static inline Node *node_get_input_port(Node *n, int direction)
+static Node *node_get_input_port(Node *n, int direction)
 {
   if (direction == ANY) {
     LocationDirection dirs[] = {LEFT,RIGHT,UP,DOWN};
@@ -215,7 +215,7 @@ static inline Node *node_get_input_port(Node *n, int direction)
   }
 }
 
-static inline Node *node_get_output_port(Node *n, int direction)
+static Node *node_get_output_port(Node *n, int direction)
 {
   if (direction == ANY) {
     LocationDirection dirs[] = {UP,LEFT,RIGHT,DOWN};
