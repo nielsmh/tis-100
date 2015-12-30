@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "util.h"
-#include <ncurses.h>
+#include <curses.h>
 
 void raise_error(const char *msg, ...) {
   va_list(args);

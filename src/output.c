@@ -1,6 +1,6 @@
 #include "output.h"
 #include "node_list.h"
-#include <ncurses.h>
+#include <curses.h>
 #include "util.h"
 #include "math.h"
 

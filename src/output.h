@@ -1,7 +1,7 @@
 #ifndef _OUTPUT_H
 #define _OUTPUT_H
 
-#include <ncurses.h>
+#include <curses.h>
 #include "node.h"
 #include "program.h"
 

@@ -8,7 +8,7 @@
 #include "input_code.h"
 #include "program.h"
 #include "util.h"
-#include "curses.h"
+#include <curses.h>
 
 
 static Node *create_node(Program *p) {
