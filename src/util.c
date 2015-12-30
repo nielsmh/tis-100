@@ -9,7 +9,9 @@
 void raise_error(const char *msg, ...) {
   va_list(args);
   va_start(args, msg);
+#ifdef RICH_OUTPUT
   endwin();
+#endif
   vfprintf(stderr, msg, args);
   fprintf(stderr, "\n");
   exit(0);
@@ -18,7 +20,6 @@ void raise_error(const char *msg, ...) {
 void custom_log(const char *msg, ...) {
   va_list(args);
   va_start(args, msg);
-  endwin();
 
   FILE *fp = fopen("tis.log", "a");
   vfprintf(fp, msg, args);
