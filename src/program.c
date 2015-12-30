@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "constants.h"
 #include "input_code.h"
@@ -64,14 +63,31 @@ int program_tick(const Program *p) {
   return all_blocked;
 }
 
-static char *read_line(FILE *fp, char *line) {
-  size_t len = 0;
-  ssize_t read = getline(&line, &len, fp);
+static char *read_line(FILE *fp, char *line, size_t *len) {
+  size_t mylen = 0;
+  size_t alloc = 64;
+  
+  if (len == NULL) len = &mylen;
+  if (line != NULL) free(line);
 
-  if (read == -1) {
-    if (line) { free(line); }
-    return NULL;
-  }
+  *len = 0;
+
+  line = malloc(alloc);
+  do {
+	  if (*len == alloc - 1) {
+		  alloc *= 2;
+		  line = realloc(line, alloc);
+	  }
+	  size_t read = fread(line + *len, 1, 1, fp);
+	  ++(*len);
+	  if (read == 0) {
+		  free(line);
+		  return NULL;
+	  }
+  } while (line[*len - 1] != '\n');
+
+  line[*len] = '\0';
+
   return line;
 }
 
@@ -80,20 +96,20 @@ static Node *create_input_node(Program *p, FILE *fp) {
   Node *n = create_node(p);
 
   char *line = NULL;
-  line = read_line(fp, line);
+  line = read_line(fp, line, NULL);
   Node *below = p->nodes_by_index[atoi(line)];
 
   n->ports[DOWN] = below;
   below->ports[UP] = n;
 
-  line = read_line(fp, line);
+  line = read_line(fp, line, NULL);
   while (line[0] != '*') {
     Instruction *i = node_create_instruction(n, MOV);
     i->src_type = NUMBER;
     i->src.number = atoi(line);
     i->dest_type = ADDRESS;
     i->dest.direction = DOWN;
-    line = read_line(fp, line);
+    line = read_line(fp, line, NULL);
   }
 
   Instruction *i = node_create_instruction(n, JRO);
@@ -108,7 +124,7 @@ static Node *create_output_node(Program *p, FILE *fp) {
   Node *n = create_node(p);
 
   char *line = NULL;
-  line = read_line(fp, line);
+  line = read_line(fp, line, NULL);
   Node *above = p->nodes_by_index[atoi(line)];
 
   Instruction *i = node_create_instruction(n, MOV);
@@ -134,7 +150,7 @@ void program_load_system(Program *p, const char *filename) {
   }
 
   char * line = NULL;
-  while ((line = read_line(fp, line))) {
+  while ((line = read_line(fp, line, NULL))) {
     Node *n = NULL;
     if (strncmp(line, "input-top", 9) == 0) {
       n = create_input_node(p, fp);
@@ -160,14 +176,13 @@ void program_load_code(Program *p, const char *filename) {
 
   char * line = NULL;
   size_t len = 0;
-  ssize_t read;
 
   InputCode all_input[PROGRAM_NODES];
   for (int i=0; i<PROGRAM_NODES; i++) {
     input_code_init(&all_input[i]);
   }
 
-  for (int index = 0; (read = getline(&line, &len, fp)) != -1;) {
+  for (int index = 0; (line = read_line(fp, line, &len));) {
 
     // ignore after comment, ignore debug
     char *c = line;
